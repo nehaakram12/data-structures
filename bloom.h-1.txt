@@ -1,0 +1,223 @@
+#include<iostream>
+#include<fstream>
+#include<time.h>
+#include <conio.h>
+#include<string>
+#include<windows.h>
+using namespace std;
+
+
+class bitvector
+{
+private:
+	unsigned char* bytes;
+	int n;
+public:
+	bitvector()
+	{
+		bytes=NULL;
+		n=0;
+	}
+	void bitvectorset(int bno)
+	{
+		n=bno;
+		int size=ceil(n/8);
+		bytes=new unsigned char[size];
+		for(int i=0;i<size;i++)
+		{
+			bytes[i]=0;
+		}
+	}
+	void set(int k)
+	{
+		int byte=k/8;
+		int bno=k%8;
+		unsigned char mask=0x80;
+		mask=mask>>bno;
+		bytes[byte]=bytes[byte]|mask;
+	}
+	void clear(int k)
+	{
+		int byte=k/8;
+		int bno=k%8;
+		unsigned char mask=0x80;
+		mask=mask>>bno;
+		bytes[bno]=bytes[bno]&(!mask);
+	}
+	bool get(int k)
+	{
+		int byte=k/8;
+		int bno=k%8;
+		unsigned char mask=0x80;
+		mask=mask>>bno;
+		return (mask & bytes[byte]);
+	}
+};
+
+class bloomfilter
+{
+private:
+	bitvector b;
+	unsigned int p; 
+	unsigned int m;
+	unsigned int a1,a2,a3,a4,a5,a6;
+
+	unsigned int generate()
+	{
+		for(int j=0;j<500000000;j++)
+		{
+			j=j+5;
+		}
+		srand(time(NULL));
+		unsigned int sum=0, val=0;
+		string s;
+		for(int i=0;i<23;i++)
+		{
+			int b=rand()%2;
+			if(b==0)
+				s=s+'0';
+			else
+				s=s+'1';
+		}
+
+		int exp=23;
+		for(int i=0;i<23;i++,exp--)
+		{
+			val=pow(2,exp);
+			if(s[i]=='1')
+				sum=sum+val;
+		}
+		return sum;
+	}
+	unsigned int power(int exp, unsigned int n)
+	{
+		unsigned int s=1;
+		for(int i=0;i<exp;i++)
+		{
+			s=(s%p * n%p)%p;
+		}
+		return s;
+	}
+	unsigned int convert(string s,unsigned int a)
+	{
+		int k=s.length()-1;
+		unsigned int sum=0;
+		for(int i=0;i<s.length();i++)
+		{			
+			sum = ( sum%p + (int(s[i]) *(power(k,a))%p )%p );
+			k--;
+		}
+		sum=sum%m;
+		return sum;
+	}
+
+
+public:
+	bloomfilter()
+	{
+		p=16777213;
+		m=728000;
+		b.bitvectorset(m);
+		a1=generate();
+		a2=generate();
+		a3=generate();
+		a4=generate();
+		a5=generate();
+		a6=generate();
+	}
+
+	void setCases(string s)
+	{
+		unsigned int b1,b2,b3,b4,b5,b6;
+		b1=convert(s,a1);
+		b2=convert(s,a2);
+		b3=convert(s,a3);
+		b4=convert(s,a4);
+		b5=convert(s,a5);
+		b6=convert(s,a6);
+		b.set(b1);
+		b.set(b2);
+		b.set(b3);
+		b.set(b4);
+		b.set(b5);
+		b.set(b6);
+	}
+
+	void store(string inputfile)
+	{
+		string s;
+		fstream fin(inputfile);
+		int i=0;
+		while(fin.eof()==0)
+		{
+			fin>>s;
+			setCases(s);
+			if(i%1000==0)
+			{
+				system("cls");
+				cout<<"Dictionary Loading...."<<i/91000.0*100<<"%"<<endl<<endl;
+			}
+			i++;
+		}
+	}
+
+	bool check(string s)
+	{
+		unsigned int b1,b2,b3,b4,b5,b6;
+		b1=convert(s,a1)%p;
+		b2=convert(s,a2)%p;
+		b3=convert(s,a3)%p;
+		b4=convert(s,a4)%p;
+		b5=convert(s,a5)%p;
+		b6=convert(s,a6)%p;
+		int count=0;
+		if(b.get(b1)==1)
+			count++;
+		if(b.get(b2)==1)
+			count++;
+		if(b.get(b3)==1)
+			count++;
+		if(b.get(b4)==1)
+			count++;
+		if(b.get(b5)==1)
+			count++;
+		if(b.get(b6)==1)
+			count++;
+		if(count==6)
+			return true;
+		return false;
+	}
+
+	void readFile(string filename)
+	{
+		string s;
+		char c;
+		fstream fin(filename);
+		HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+		while(fin.eof()==0)
+		{
+			fin.get(c);
+			if(c==' ' || c==',' || c=='.' || c=='"' || c==';' || c==';' || c=='\'' || c=='/' || c=='\n' )
+			{
+				if(check(s)==1)
+				{
+					SetConsoleTextAttribute(hConsole,7);
+					cout<<s;
+				}
+				else
+				{
+					SetConsoleTextAttribute(hConsole,FOREGROUND_RED);
+					cout<<s;
+				}
+				cout<<c;
+				s="";
+			}
+			else
+			{
+				if(c>='A' && c<='Z')
+					c=c+32;
+				s=s+c;
+			}
+		}
+	}
+};

@@ -1,0 +1,28 @@
+#include<iostream>
+#include<conio.h>
+#include "bst.h"
+//#include "Vector.h"
+using namespace std;
+
+void main()
+{
+	int arr[]={60,30,70,80,20,90,10,50,100,40};
+	bst<int> b;
+	for(int i=0;i<10;i++)
+	{  b.insert(arr[i]);	}
+	bst<int>::iterator itr;
+	int i=0;
+	for(itr=b.begin();i<(b.getSize());++itr,i++)
+	{   cout<<*(itr)<<"   ";	}
+	b.remove(5);
+	i=0;cout<<endl;
+	for(itr=b.begin();i<(b.getSize());++itr,i++)
+	{   cout<<*(itr)<<"   ";	}
+	cout<<endl;
+	getch();
+	
+	cout<<b.height()<<endl;
+	cout<<b.width()<<endl;
+	b.printPathSums();
+	getch();
+}

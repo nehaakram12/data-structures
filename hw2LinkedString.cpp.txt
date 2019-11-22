@@ -1,0 +1,424 @@
+#include "LinkedString.h"
+using namespace std;
+
+
+LinkedString::LinkedString()
+{
+	strhead=strtail=NULL;
+	length=0;
+}
+LinkedString::LinkedString(const string& s)
+{
+	int i=0;
+	length=0;
+	while (s[i]!=NULL)
+	{
+		insertChar(s[i]);
+		i++;
+	}
+}
+LinkedString::LinkedString(const LinkedString& l)
+{
+	node *curr=l.strhead;
+	length=0;
+	for(int i=0;i<l.length;i++)
+	{
+		char data=curr->ch;
+		insertChar(data);
+		curr=curr->next;
+	}
+	curr=NULL;
+}
+const LinkedString& LinkedString::operator = (const LinkedString& l)
+{
+	length=l.length;
+	strhead=l.strhead;
+	strtail=l.strtail;
+	return l;
+}
+void LinkedString::insertChar(const char& data)
+{
+	if(length==0)
+	{
+		strhead=strtail=new node(data);
+		strhead->next=NULL;
+		strtail->next=NULL;
+		length++;
+	}
+	else
+	{
+		if(length==1)
+		{
+			strhead->next=strtail;
+		}
+		strtail->next=new node(data);
+		node *curr=strtail->next;
+		curr->next=NULL;
+		strtail=curr;
+		length++;
+	}
+}
+void LinkedString::eraseChar(const char& data)
+{
+	if(length>0)
+	{
+		node *prev=NULL,*curr=strhead;
+		while(curr!=NULL && curr->ch!=data)
+		{
+			prev=curr;
+			curr=curr->next;
+		}
+		if(curr!=NULL)
+		{
+			if(prev==NULL)
+			{
+			}
+		}
+	}
+
+}
+//LinkedString::~LinkedString ()
+//{
+//	node *curr=strhead,*temp=NULL;
+//	for(int i=0;i<length;i++)
+//	{
+//		temp=curr->next;
+//		delete curr;
+//		curr=temp;
+//	}
+//	delete strhead;
+//}
+int LinkedString::getLength()
+{
+	return length;
+}
+LinkedString LinkedString::operator + (const LinkedString & s)
+{
+	LinkedString plus;
+	plus.length=length+s.length;
+	plus.strhead=strhead;
+	plus.strtail=strtail;
+	plus.insertChar(' ');
+	plus.strtail->next=s.strhead;
+	plus.strtail=s.strtail;
+	return plus;
+}
+bool  LinkedString::find(const LinkedString& l)
+{
+	char *look=new char[l.length];
+	node *curr=l.strhead;
+	for(int i=0;i<l.length;i++)
+	{
+		char data=curr->ch;
+		look[i]=data;
+		curr=curr->next;
+	}
+	curr=NULL;
+	node *current=strhead;
+	bool found=0;
+	for (int i=0;i<length && found==0;i++)
+	{
+		if(current->ch==look[0])
+		{
+			found=1;
+			for(int j=0;j<l.length && found==1 ;j++)
+			{
+				if(current->ch!=look[j])
+					found=0;
+				else
+				{
+					i++;
+					current=current->next;
+				}
+			}
+		}
+		current=current->next;
+	}
+	return found;
+}
+bool  LinkedString::find(const string& s)
+{
+	int size=0;
+	while(s[size]!=NULL)
+	{
+		size++;
+	}
+	node *current=strhead;
+	bool found=0;
+	for (int i=0;i<length && found==0;i++)
+	{
+		if(current->ch==s[0])
+		{
+			found=1;
+			for(int j=0;j<size && found==1 ;j++)
+			{
+				if(current->ch!=s[j])
+					found=0;
+				else
+				{
+					i++;
+					current=current->next;
+				}
+			}
+		}
+		if(i<length)
+			current=current->next;
+	}
+	return found;
+}
+LinkedString LinkedString::findAndCopy(const string& s)
+{
+	LinkedString yeap;
+	if(this->find(s)==0)
+		cout<<"NOT FOUND"<<endl;
+	else
+	{
+		int size=0;
+		while(s[size]!=NULL)
+		{
+			size++;
+		}
+		node *current=strhead;
+		bool found=0;
+		for (int i=0;i<length && found==0;i++)
+		{
+			if(current->ch==s[0])
+			{
+				found=1;
+				yeap.strhead=current;
+				for(int j=0;j<size && found==1 ;j++)
+				{
+					if(current->ch!=s[j])
+						found=0;
+					else
+					{
+						i++;
+						current=current->next;
+					}
+					if(j=size-1)
+						yeap.strtail=current;
+				}
+			}
+			if(i<length)
+				current=current->next;
+		}
+		yeap.length=size;
+	}
+	return yeap;
+}
+LinkedString LinkedString::findAndCut(const string& s)
+{
+	if(this->find(s)==0)
+		cout<<"NOT FOUND"<<endl;
+	else
+	{
+		int size=0;
+		while(s[size]!=NULL)
+		{
+			size++;
+		}
+		node *prev=NULL,*current=strhead,*temp1,*temp2;
+		bool found=0;
+		for (int i=0;i<length && found==0;i++)
+		{
+			if(current->ch==s[0])
+			{
+				found=1;
+				temp1=prev;
+				for(int j=0;j<size && found==1 ;j++)
+				{
+					if(current->ch!=s[j])
+						found=0;
+					else
+					{
+						if(j==size-1)
+							temp2=current;
+						prev=current;
+						current=current->next;
+						i++;
+						length--;
+					}
+				}
+			}
+			if(i<length)
+			{
+				prev=current;
+				current=current->next;
+			}
+		}
+		LinkedString cut;
+		cut.strhead=temp1->next;
+		cut.strtail=temp2;
+		temp1->next=temp2->next;
+		temp2->next=NULL;
+		cut.length=size;
+		return cut;
+	}
+	return *this;
+}
+void LinkedString::findAndReplace(const string&s1,const string&s2)
+{
+	LinkedString replace(s2);
+	if(this->find(s1)==0)
+		cout<<"NOT FOUND"<<endl;
+	else
+	{
+		int size=0;
+		while(s1[size]!=NULL)
+		{
+			size++;
+		}
+		node *prev=NULL,*current=strhead,*temp1,*temp2;
+		bool found=0;
+		for (int i=0;i<length && found==0;i++)
+		{
+			if(current->ch==s1[0])
+			{
+				found=1;
+				temp1= prev;
+				for(int j=0;j<size && found==1 ;j++)
+				{
+					if(current->ch!=s1[j])
+						found=0;
+					else
+					{
+						if(j==size-1)
+							temp2=current;
+						prev->next=current->next;
+						if(j!=size-1)
+							delete current;
+						current=prev->next;
+						i++;
+					}
+				}
+			}
+			if(i<length)
+				{
+				prev=current;
+				current=current->next;
+				}
+		}
+		temp1->next=replace.strhead;
+		replace.strtail->next=temp2->next;
+		delete temp2;
+		length=length+replace.length-size;
+	}
+}
+void LinkedString::findAndInsertAfter (const string&s1, const string&s2)
+{
+	LinkedString insert(s2);
+	if(this->find(s1)==0)
+		cout<<"NOT FOUND"<<endl;
+	else
+	{
+		int size=0;
+		while(s1[size]!=NULL)
+		{
+			size++;
+		}
+		node *prev=NULL,*current=strhead,*temp1,*temp2;
+		bool found=0;
+		for (int i=0;i<length && found==0;i++)
+		{
+			if(current->ch==s1[0])
+			{
+				found=1;
+				for(int j=0;j<size && found==1 ;j++)
+				{
+					if(current->ch!=s1[j])
+						found=0;
+					else
+					{
+						if(j==size-1)
+							temp2=current;
+						prev=current;
+						current=prev->next;
+						i++;
+					}
+				}
+			}
+			if(i<length)
+				{
+				prev=current;
+				current=current->next;
+				}
+		}
+
+		insert.strtail->next=temp2->next;
+		temp2->next=insert.strhead;
+		length=length+insert.length;
+	}
+}
+void LinkedString::findAndInvert(const string& s)
+{
+	LinkedString yeap;
+	if(this->find(s)==0)
+		cout<<"NOT FOUND"<<endl;
+	else
+	{
+		int size=0;
+		while(s[size]!=NULL)
+		{
+			size++;
+		}
+		node *current=strhead,*temp1,*temp2,*prev=NULL;
+		bool found=0;
+		for (int i=0;i<length && found==0;i++)
+		{
+			if(current->ch==s[0])
+			{
+				found=1;
+				temp1= prev;
+				yeap.strhead=current;
+				for(int j=0;j<size && found==1 ;j++)
+				{
+					if(current->ch!=s[j])
+						found=0;
+					else
+					{
+						if(j==size-1)
+							temp2=current->next;
+						i++;
+						prev=current;
+						current=current->next;
+					}
+					if(j==size-2)
+						yeap.strtail=current;
+				}
+			}
+			if(i<length)
+			{
+				prev=current;
+				current=current->next;
+			}
+		}
+		yeap.length=size;
+		yeap.reverse();
+		yeap.strtail->next=temp2;
+		temp1->next=yeap.strhead;
+	}	
+}
+void LinkedString::reverse()
+{
+	node* curr=strhead,*prev=NULL,*temp=NULL;
+	for(int i=0; i<length;i++)
+	{
+		temp=curr->next;
+		curr->next=prev;
+		prev=curr;
+		curr=temp;
+	}
+	temp=strhead;
+	strhead=strtail;
+	strtail=temp;
+	temp=NULL;
+
+}
+istream & operator >> (istream & input,LinkedString& l)
+	{
+		string temp1;
+		getline(cin,temp1);
+	    LinkedString str1(temp1);
+		l=str1;
+		return input;
+	}

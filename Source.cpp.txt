@@ -1,0 +1,63 @@
+#include "skipList.h"
+
+
+void main()
+{
+	int func = -1;
+	skipList list;
+	cout << "***SKIPLISTS***\n\n";
+	cout << "1-) Print list\n2-) Insert key\n3-) Search key\n4-) Delete key\n0-) Exit\n\n";
+	while (func == -1)
+	{
+		cin >> func;
+		if (func == 0)
+		{
+			break;
+		}
+		else if (func == 1)
+		{
+			cout << "\n";
+			list.printAscending();
+			func = -1;
+		}
+		else if (func == 2)
+		{
+			cout << "Enter key to insert\n";
+			int insertkey;
+			cin >> insertkey;
+			list.insert(insertkey);
+			func = -1;
+		}
+		else if (func == 3)
+		{
+			cout << "Enter key to search\n";
+			int searchkey;
+			cin >> searchkey;
+			if (list.search(searchkey))
+				cout << "Key found\n";
+			else
+				cout << "Key not found\n";
+			func = -1;
+		}
+		else if (func == 4)
+		{
+			cout << "Enter key to delete\n";
+			int del;
+			cin >> del;
+			if (list.search(del))
+			{
+				list.erase(del);
+				cout << "Key deleted\n";
+			}
+			func = -1;
+		}
+		else
+		{
+			cout << "Invalid command\n";
+			func = -1;
+		}
+		cout << "\n***SKIPLISTS***\n\n";
+		cout << "1-) Print list\n2-) Insert key\n3-) Search key\n4-) Delete key\n0-) Exit\n\n";
+	}
+	system("pause");
+}

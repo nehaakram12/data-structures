@@ -1,0 +1,174 @@
+#include<iostream>
+#include<fstream>
+#include<conio.h>
+#include<string>
+#include"heap.h"
+using namespace std;
+
+int getNumber(string comb)		// byte to dec
+{
+	int exp=7,val=0,sum=0;
+	for(int i=0;i<8;i++,exp--)
+	{
+		val=pow(2,exp);
+		if(comb[i]=='1')
+			sum=sum+val;
+	}
+	return sum;
+}
+void computeFrequency(string num,int freq_table[256])
+{
+	string str;
+	for(int i=0;i<num.length();i=i+8)
+	{
+		str=num.substr(i,8);
+		cout<<str<<"  ";	//print input string on screen
+		freq_table[getNumber(str)]++;
+	}
+	cout<<endl;
+}
+string returnString(int n,string num)
+{
+	string str;
+	for(int i=0;i<num.length();i=i+8)
+	{
+		str=num.substr(i,8);
+		if(getNumber(str)==n)
+			return str;
+	}
+	return str;
+}
+minHeap<element> makeHeap(string num,int freq_table[256])
+{
+	vector<element> v;
+	v.resize(1);
+	for(int i=0;i<256;i++)
+	{
+		if(freq_table[i]!=0)
+		{
+			element e;
+			e.symbol=returnString(i,num);
+			e.frequency=freq_table[i];
+			if(i%2==0)
+				e.code=0;
+			else
+				e.code=1;
+			v.push_back(e);
+		}
+	}
+	minHeap<element> heap(v);
+	int n=heap.size();
+	for(int i=n/2;i>0;i--)
+	{
+		heap.heapify(i);
+	}
+	return heap;
+
+}
+void compressionTree(minHeap<element> &heap)
+{
+	while (heap.size()>=2)
+	{
+		element min1,min2;
+		min1=heap.getMin();
+		heap.delMin();
+		min2=heap.getMin();
+		heap.delMin();
+		element *t1=new element(min1);
+		element *t2=new element(min2);
+		element node;
+		node.frequency=min1.frequency+min2.frequency;
+		node.l=t1;
+		t1->code='0';
+		node.r=t2;
+		t2->code='1';
+		heap.insert(node);
+	}
+
+}
+vector<code> getCode(const element& e)
+{
+	static string cod;
+	static vector<code> cvec;
+	if(e.symbol!="-")
+	{
+		code c;
+		c.symbol=e.symbol;
+		c.codes=cod;
+		cvec.push_back(c);
+		cod.pop_back();
+	}
+	else if(e.l!=NULL || e.r!=NULL)
+	{
+		cod.push_back(e.l->code);
+		getCode(*e.l);
+		cod.push_back(e.r->code);
+		getCode(*e.r);
+		if(cod.length()>0)
+			cod.pop_back();
+	}
+	return cvec;
+}
+string returnOutput(string num,vector<code> v1)
+{
+	string output,str1;
+	for(int i=0;i<num.length();i=i+8)
+	{
+		str1=num.substr(i,8);
+		for(int j=0;j<v1.size();j++)
+		{
+			if(v1[j].symbol==str1)
+			{
+				output.append(v1[j].codes);
+				cout<<v1[j].codes<<" ";	//print output string on screen
+			}
+		}
+	}
+	cout<<endl<<endl;
+	return output;
+}
+string writeToFile(string ofilename,minHeap<element> heap,string num)
+{
+	vector<code> v1=getCode(heap.getMin());
+	ofstream fout(ofilename);
+	for(int i=0;i<v1.size();i++)
+	{
+		cout<<v1[i]<<endl;
+		fout<<v1[i];
+	}
+	fout<<endl;
+	string output=returnOutput(num,v1);
+	fout<<output<<endl;
+	return output;
+}
+string readFromFile(string ifilename)
+{
+	string num;
+	ifstream fin(ifilename);
+	getline(fin,num);
+	return num;
+}
+
+void compress(string ifilename,string ofilename)
+{
+	string num=readFromFile(ifilename);
+	int freq_table[256]={0};
+	computeFrequency(num,freq_table);
+	minHeap<element> heap=makeHeap(num,freq_table);
+	compressionTree(heap);
+	heap.print();
+	string output=writeToFile(ofilename,heap,num);
+	float n=output.length(),N=num.length();
+	float ratio=(1.0-n/N);
+	cout<<"Compression completed, p =  "<<ratio*100<<"%"<<endl;
+}
+
+void main()
+{
+	string ofilename="sample6.cmp";
+	string ifilename="sample6.8b";
+	
+	compress(ifilename,ofilename);
+	
+	getch();
+}

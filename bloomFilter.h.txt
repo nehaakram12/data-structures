@@ -1,0 +1,168 @@
+#pragma once
+#include "bitVector.h"
+#include <time.h>
+#include <string>
+#include <Windows.h>
+#include <fstream>
+class bloomFilter
+{
+	bitVector bvector;
+	unsigned int p, m, a1, a2, a3, a4, a5, a6;
+
+public:
+	bloomFilter()
+	{
+		p = 16777213;
+		m = 7280000;
+		bitVector bvector(m);
+		a1 = generate();
+		a2 = generate();
+		a3 = generate();
+		a4 = generate();
+		a5 = generate();
+		a6 = generate();
+	}
+	unsigned int convert(string word, unsigned int num)
+	{
+		unsigned int z = 0;
+		int i = 0;
+		while (word.size() != 0)
+		{
+			unsigned int b = word[word.size() - 1];
+			b = b * pow(num, i);
+			word.pop_back();
+			z = sum(z, b);
+			i++;
+		}
+		return z%m;
+	}
+	void load(string file = "dict.txt")
+	{
+		ifstream fin;
+		fin.open(file);
+		float i = 1;
+		int k = 1;
+		while (!fin.eof())
+		{
+			if (k % 1000 == 0)
+			{
+				system("cls");
+				cout << "Loading dictionary\n" << i << " of " << 91000 << " : " << (i / 91000 * 100) << "%" << endl;
+				Sleep(50);
+			}
+			string x;
+			fin >> x;
+			unsigned int z = convert(x, a1);
+			bvector.set(z);
+			z = convert(x, a2);
+			bvector.set(z);
+			z = convert(x, a3);
+			bvector.set(z);
+			z = convert(x, a4);
+			bvector.set(z);
+			z = convert(x, a5);
+			bvector.set(z);
+			z = convert(x, a6);
+			bvector.set(z);
+			i++;
+			k++;
+		}
+		fin.close();
+
+	}
+	void printa()
+	{
+		cout << a1 << endl;
+		cout << a2 << endl; 
+		cout << a3 << endl; 
+		cout << a4 << endl;
+		cout << a5 << endl; 
+		cout << a6 << endl;
+	}
+	unsigned int power(unsigned int x, int y)
+	{
+		unsigned int z = 0;
+		if (y == 0)
+			z = 1;
+		for (int i = 0; i < y; i++)
+		{
+			z = z + ((x * x) % p);
+			z = z % p;
+		}
+		return z;
+	}
+	unsigned int multiply(unsigned int x, unsigned int y)
+	{
+		unsigned int z = 0;
+		z = ((x %p) * y%p) % p;
+		return z;
+	}
+	unsigned int sum(unsigned int x, unsigned int y)
+	{
+		unsigned int z = 0;
+		z = ((x %p) + y%p) % p;
+		return z;
+	}
+	unsigned int generate()
+	{
+		srand(time(NULL));
+		string x;
+		for (int i = 0; i < 23; i++)
+		{
+			int y = rand() % 2;
+			Sleep(50);
+			if (y == 1)
+				x.push_back(1);
+			else
+				x.push_back(0);
+		}
+		unsigned int z = 0;
+		for (int i = 0; i < 23; i++)
+		{
+			z =  sum(z,(pow(2,i)*(x[x.size()-1] - 0)))%p;
+			x.pop_back();
+		}
+		return z;
+	}
+	bool checkspelling(string s)
+	{
+		unsigned int b;
+		int count = 0;
+		b = convert(s, a1);
+		if (bvector.get(b) == 1)
+			count++;
+		b = convert(s, a2);
+		if (bvector.get(b) == 1)
+			count++;
+		b = convert(s, a3);
+		if (bvector.get(b) == 1)
+			count++;
+		b = convert(s, a4);
+		if (bvector.get(b) == 1)
+			count++;
+		b = convert(s, a5);
+		if (bvector.get(b) == 1)
+			count++;
+		b = convert(s, a6);
+		if (bvector.get(b) == 1)
+			count++;
+		if (count == 6)
+			return true;
+		return false;
+	}
+	void readfile(string file)
+	{
+		ifstream fin;
+		fin.open("file.txt");
+		string x;
+		while (!fin.eof())
+		{
+			fin >> x;
+			if (checkspelling(x))
+			{
+				cout << x << ' ';
+			}
+			
+		}
+	}
+};

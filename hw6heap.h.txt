@@ -1,0 +1,146 @@
+#include<iostream>
+#include <vector>
+using namespace std;
+
+struct code
+{
+	string symbol;
+	string codes;
+
+	friend ostream & operator << (ostream & out,const code& e)
+	{
+		out<<"Symbol: "<<e.symbol<<"	Code: "<<e.codes<<endl;
+		return out;
+	}
+	friend ofstream & operator << (ofstream & write,const code& e)
+	{
+		write<<e.symbol<<" "<<e.codes<<" ";
+		return write;
+	}
+};
+struct element
+{
+	string symbol;
+	int frequency;
+	char code;
+	element *l,*r;
+
+	element(){ symbol="-";	frequency=0;	code='0';		l=r=NULL;	}
+	//void printElement()
+	bool operator <(const element& e)
+	{
+		if(frequency<e.frequency)
+			return true;
+		return false;
+	}
+	bool operator >(const element& e)
+	{
+		if(frequency>e.frequency)
+			return true;
+		return false;
+	}
+	bool operator <=(const element& e)
+	{
+		if(frequency<=e.frequency)
+			return true;
+		return false;
+	}
+	bool operator >=(const element& e)
+	{
+		if(frequency>=e.frequency)
+			return true;
+		return false;
+	}
+
+	friend ostream & operator << (ostream & out,const element& e)
+	{
+		out<<"Symbol: "<<e.symbol<<"	Frequency: "<<e.frequency<<"	Code: "<<e.code<<endl;
+		return out;
+	}
+};
+
+template <typename t>
+class minHeap
+{
+private:
+	vector<t> h;
+
+
+	inline int parent(int i){ return i/2;	}
+	inline int lchild(int i){ return i*2;	}
+	inline int rchild(int i){ return i*2+1;	}
+
+public:
+	minHeap(){ h.resize(1);	}
+	minHeap(const vector<t> v){ h=v; }
+	int size(){ return h.size()-1;	}
+	t getMin(){ return h[1];	}
+	void delMin()
+	{
+		if(size()>0)
+		{
+			swap(h[1],h[size()]);
+			h.pop_back();
+			heapify(1);
+		}
+		}
+	t* getMin1(){ return &h[1]; }
+	t* getMin2(){ return &h[2]; }
+
+	void heapify(int i)
+	{
+		int lc=lchild(i),rc=rchild(i),imin=i;
+		if(lc<=size() && h[lc]<h[imin])
+			imin=lc;
+		if( rc<=size() && h[rc]<h[imin] )
+			imin=rc;
+		if(i!=imin)
+		{
+			swap(h[i],h[imin]);
+			heapify(imin);
+		}
+	}
+	void push(t object)
+	{ h.push_back(object);	}
+	void insert(const t& key)
+	{
+		h.push_back(key);
+		int i=size();
+		while(i>1 && h[parent(i)]>h[i])
+		{
+			swap(h[i],h[parent(i)]);
+			i=i/2;
+		}
+	}
+	void erase(int key)
+	{
+		if(size()>0)
+		{
+			swap(h[key],h[size()]);
+			h.pop_back();
+			heapify(1);
+		}
+	}
+	void print()
+	{
+		vector<element*> vnodes;
+		getNodes_inOrder(&h[1],vnodes);
+		for(int i=0;i<vnodes.size();i++)
+		{   cout<<*vnodes[i];	}
+	}
+	void getNodes_inOrder(element *n,vector<element*>& nodes)
+	{
+		if(n!=NULL)
+		{
+			getNodes_inOrder(n->l,nodes);
+			nodes.push_back(n);
+			getNodes_inOrder(n->r,nodes);
+		}
+	}
+	
+
+
+
+
+
+};

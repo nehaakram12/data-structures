@@ -1,0 +1,18 @@
+#include<iostream>
+#include<time.h>
+#include<string>
+#include<conio.h>
+#include "bloom.h"
+using namespace std;
+
+
+void main()
+{
+	bloomfilter b;
+	string s="accomodate";
+	b.setCases(s);
+	b.store("dict.txt");
+
+	getch();
+
+}

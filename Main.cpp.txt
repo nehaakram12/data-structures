@@ -1,0 +1,40 @@
+#pragma once
+#include<iostream>
+#include<fstream>
+#include<string>
+#include<Windows.h>
+#include"BitVector.h"
+using namespace std;
+
+void main()
+{
+	BloomFilter b;
+	cout << "_________________________________SPELL CHECKER_______________________________" << endl;
+	cout << "1.Load Dictionary" << endl;
+	int c=-1;
+	cin >> c;
+	if (c==1)
+		{
+			system("cls");
+			b.LoadDictionary();
+	    }
+	cout << "Press 2 to check file" << endl;
+	cin >> c;
+	if (c==2)
+	{
+		label:cout << "Enter filename: " << endl;
+		string filename;
+		cin >> filename;
+		b.ReadFromFile(filename);
+		cout << endl << "Press 2 to check another file " << endl;
+		int k=-1;
+		cin >> k;
+		if (k==2)
+			{
+				system("cls");
+				goto label;
+		    }
+	}
+
+	system("pause");
+}

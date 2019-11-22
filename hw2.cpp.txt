@@ -1,0 +1,110 @@
+#include<iostream>
+#include<conio.h>
+#include<string>
+#include "LinkedString.h"
+using namespace std;
+
+void main()
+{
+	string temp1,temp2;
+	LinkedString str1,str2,str3;
+	char menu=0;
+	int exit=0;
+
+
+	while(exit==0) 
+	{
+		system("cls");
+		cout<<"__________________________LINKED LISTS MENU__________________________"<<endl;
+		cout<<"1.Input a linked string\n";
+		cout<<"2.Replace a word in a string\n";
+		cout<<"3.Copy a word in a string\n";
+		cout<<"4.Cut a word in a string\n";
+		cout<<"5.Invert a word in a string\n";
+		cout<<"6.Insert after a word in a string\n";
+		cout<<"7.Reverse a string\n";
+		cout<<"8.Concatenate a string\n";
+		cout<<"9.Exit program\n";
+		cout<<endl;
+		cin>>menu;
+	
+		cin>>str2;
+		
+		if(menu=='1')
+		{
+			cout<<"Input string?\n";
+			cin>>str1;
+			cout<<"str1   "<<endl;
+			cout<<str1;
+		}
+		if(menu=='2')
+		{
+			cout<<str1;
+			cout<<"Enter word to find?\n";
+			getline(cin,temp1);cout<<endl;
+			cout<<"Enter word to replace with?\n";
+			getline(cin,temp2);cout<<endl;
+			str1.findAndReplace(temp1,temp2);
+			cout<<str1;;
+		}
+		if(menu=='3')
+		{
+			cout<<str1;
+			cout<<"Enter word to copy?\n";
+			getline(cin,temp1);cout<<endl;
+			cout<<"Word copied:  "<<str1.findAndCopy(temp1);
+			cout<<"Your string: "<<str1;
+		}
+		if(menu=='4')
+		{
+			cout<<str1;
+			cout<<"Enter word to cut?\n";
+			getline(cin,temp1);cout<<endl;
+			cout<<"Word cut:  "<<str1.findAndCut(temp1);
+			cout<<"Your string: "<<str1;
+		}
+		if(menu=='5')
+		{
+			cout<<str1;
+			cout<<"Enter word to invert?\n";
+			getline(cin,temp1);cout<<endl;
+			str1.findAndInvert(temp1);
+			cout<<"Your string: "<<str1;
+		}
+		if(menu=='6')
+		{
+			cout<<str1;
+			cout<<"Enter what word to insert after?\n";
+			getline(cin,temp1);cout<<endl;
+			cout<<"Enter word to insert?\n";
+			getline(cin,temp2);cout<<endl;
+			str1.findAndInsertAfter(temp1,temp2);
+			cout<<"Your string: "<<str1;
+		}
+		if(menu=='7')
+		{
+			cout<<str1;
+			str1.reverse();
+			cout<<"Your string: "<<str1;
+		}
+		if(menu=='8')
+		{
+			cout<<str1<<endl;
+			cout<<"Enter string to concatenate at the end?"<<endl;
+			cin>>str2;
+			str1=str1+str2;
+			cout<<str1<<endl;
+		}
+		if(menu=='9')
+		{
+			exit=1;
+		}
+
+		if(menu!='9')
+		{
+		cout<<"Press any key to go back to menu";
+		menu=getch();
+		}
+
+	}
+}

@@ -1,0 +1,48 @@
+#include<iostream>
+#include<conio.h>
+#include <string>
+using namespace std;
+
+class LinkedString
+{
+	struct  node
+	{
+		char ch;
+		node *next;
+		node(const char & c){ ch=c;	next=NULL;	}
+
+	};
+	node *strhead, *strtail;
+	int length;
+public:
+	LinkedString();
+	LinkedString(const string&);
+	LinkedString(const LinkedString&);
+	const LinkedString& operator = (const LinkedString&);
+	void insertChar(const char& data);
+	void eraseChar(const char& data);
+	friend ostream & operator << (ostream & out,const LinkedString& l)
+	{
+		node *curr=l.strhead;
+		int length=l.length;
+		for(int i=0;i<length;i++)
+		{
+			out<<curr->ch;
+			curr=curr->next;
+		}
+		out<<endl;
+		return out;
+	}
+	friend istream & operator >> (istream & input,LinkedString& l);
+	//~LinkedString ();
+	int getLength();
+	LinkedString operator + (const LinkedString &);
+	bool  find(const LinkedString&);
+	bool   find(const string&);
+	LinkedString findAndCopy(const string&);
+	LinkedString findAndCut(const string&);
+	void findAndReplace(const string&,const string&);
+	void findAndInsertAfter (const string&, const string&);
+	void findAndInvert(const string&);
+	void reverse();
+};

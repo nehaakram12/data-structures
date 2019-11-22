@@ -1,0 +1,351 @@
+#include<iostream>
+#include <Vector>
+using namespace std;
+
+
+template <typename t>
+class bst
+{
+private:
+
+	struct node
+	{
+		t data;
+		node *lchild,*rchild;
+
+		node(const t & d){	data=d;	lchild=rchild=NULL;	}
+	};
+
+	node *root;
+	int size;
+	
+	node* createNode(const t & obj)
+	{
+		node* n=new node(t);
+		size++;
+		return n;
+	}
+	void getNodes_inOrder(node *n,vector<node*>& nodes)
+	{
+		if(n!=NULL)
+		{
+			getNodes_inOrder(n->lchild,nodes);
+			nodes.push_back(n);
+			getNodes_inOrder(n->rchild,nodes);
+		}
+	}
+	void getNodes_preOrder(node *n,vector<node*>& nodes)
+	{
+		if(n!=NULL)
+		{
+			nodes.push_back(n);
+			getNodes_preOrder(n->lchild,nodes);
+			getNodes_preOrder(n->rchild,nodes);
+		}
+	}
+	void getNodes_postOrder(node *n,vector<node*>& nodes)
+	{
+		if(n!=NULL)
+		{
+			getNodes_postOrder(n->lchild,nodes);
+			getNodes_postOrder(n->rchild,nodes);
+			nodes.push_back(n);
+		}
+	}
+	int heightOfNode(node *n)
+	{
+		int h=0;
+		if(	n==NULL || isleaf(n)==1 )
+			h=0;
+		else
+		{
+			int lh=heightOfNode(n->lchild);
+			int rh=heightOfNode(n->rchild);
+			h=max(lh,rh)+1;
+		}
+		return h;
+	}
+	bool isleaf(node *n)
+	{
+		if(n->lchild==NULL && n->rchild==NULL)
+			return true;
+		return false;
+	}
+	int max(int a, int b)
+	{
+		if(a>b)
+			return a;
+		return b;
+	}
+public:
+
+	bst(){  root=NULL;	size=0;	}
+	bool search(const t & obj)
+	{
+		int found=0;
+		if(root==NULL)
+			return false;
+		else
+		{
+			node *curr=root;
+			while(curr!=NULL && found==0)
+			{
+				if(curr!=NULL && curr->data==obj)
+					found=1;
+				else if(curr->lchild!=NULL && obj<=(curr->lchild)->data)
+					curr=curr->lchild;
+				else
+					curr=curr->rchild;
+
+			}
+		}
+		return found;
+	}
+	void insert(const t & obj)
+	{
+		node *curr=root,*prev=NULL;
+		while(curr!=NULL)
+		{
+			prev=curr;
+			if(curr->data<obj)
+				curr=curr->rchild;
+			else if(curr->data>obj)
+				curr=curr->lchild;
+		}
+		if(prev==NULL)
+		{
+			root=new node(obj);
+			root->rchild=root->lchild=NULL;
+		}
+		else
+		{
+			if(prev->data<obj)
+			{
+				prev->rchild=new node(obj);
+				prev->rchild->rchild=NULL;
+				prev->rchild->lchild=NULL;
+			}
+			else if(prev->data>obj)
+			{
+				prev->lchild=new node(obj);
+				prev->lchild->rchild=NULL;
+				prev->lchild->lchild=NULL;
+			}
+		}
+		size++;
+	}
+	void remove(const t & obj)
+	{
+		node *curr=root,*prev=NULL;
+		if(root==NULL)
+			cout<<"Tree empty"<<endl;
+		if(search(obj)==0)
+			cout<<"Not found"<<endl;
+		else if(search(obj)!=0 && root!=NULL)
+		{
+			size--;
+			bool found=0;
+			while (curr!=NULL && found==0)
+			{
+				if (obj == curr->data)
+					found=1;
+				else
+				{
+					prev = curr;
+					if (obj < curr->data)
+						curr = curr->lchild;
+					else if (obj > curr->data)
+						curr = curr->rchild;
+				}
+			}
+			if(isleaf(curr)==1)		//curr=leaf
+			{
+				if (curr == root)
+					curr = nullptr;
+				else if (prev->lchild==curr)
+					prev->lchild=NULL;
+				else
+					prev->rchild=NULL;
+				delete curr;
+			}
+			else if(curr->lchild!=NULL && curr->rchild==NULL)		//only left child
+			{
+				if (prev->lchild == curr)
+					prev->lchild = curr->lchild;
+				else
+					prev->rchild = curr->lchild;
+				delete curr;
+				curr = nullptr;
+			}
+			else if(curr->lchild==NULL && curr->rchild!=NULL)		//only right child
+			{
+				if (prev->lchild == curr)
+					prev->lchild=curr->rchild;
+				else
+					prev->rchild=curr->rchild;
+				delete curr;
+				curr=NULL;
+			}
+			else // two children 82
+			{
+				node *rightLchild = curr->rchild; //100
+				while (rightLchild->lchild!=NULL)
+				{
+					rightLchild=rightLchild->lchild; //90
+				}
+				curr->data = rightLchild->data; //82=90
+				node *del_rl= curr; // now 90
+				if (del_rl->rchild == rightLchild) 
+				{
+					delete rightLchild;
+					del_rl->rchild=NULL;
+				}
+				else
+				{
+					node*find_rl = curr->rchild; //100
+					while (find_rl->lchild != rightLchild) //90
+					{
+						find_rl = find_rl->lchild;
+					}
+					if (rightLchild->rchild!=NULL) 
+					{
+						find_rl->lchild = rightLchild->rchild;
+					}
+					else
+						find_rl->lchild=NULL;
+					delete rightLchild;
+				}
+			}
+		}
+	}
+	int height()
+	{
+		return heightOfNode(root);
+	}
+	int getSize()
+	{
+		return size;
+	}
+
+	class iterator
+	{
+	private:
+		vector<node*> nodes;
+		int index;
+	public:
+		iterator()
+		{
+			index=0;
+		}
+		iterator (const vector<node*> v,int i)
+		{
+			nodes=v;
+			index=i;
+		}
+		iterator(const iterator & itr)
+		{
+			index = itr.index;
+			nodes = itr.nodes;
+		}
+		iterator operator = (const iterator & itr)
+		{
+			nodes = itr.nodes;
+			index = itr.index;
+			return *this;
+		}
+		bool operator !=(const iterator & itr)
+		{
+			return (nodes!=itr.nodes || index!=itr.index);
+		}
+		iterator & operator++()
+		{
+			index++;
+			return *this;
+		}
+		iterator operator++(int a)
+		{
+			index=index+a;
+			return *this;
+		}
+		t operator *()
+		{
+			return (nodes[index])->data;
+
+		}
+	};
+
+	iterator begin()
+	{
+		vector<node*> vnodes;
+		getNodes_inOrder(root,vnodes);
+		iterator itr(vnodes,0);
+		return itr;
+	}
+	iterator end()
+	{
+		vector<node*> vnodes;
+		getNodes_inOrder(root,vnodes);
+		iterator itr(vnodes,size);
+		return itr;
+	}
+
+	int WidthOfNode(node* n,int level)
+	{
+       if(n==NULL)
+		   return 0;
+	   if(level==1)
+		   return 1;
+	   else if(level>1)
+	   {
+		    return WidthOfNode(n->lchild, level-1) + WidthOfNode(n->rchild, level-1);
+	   }   
+	}
+	int width()
+	{
+	    int max = 0,width=0;;
+		for(int i=0; i<=height()+1;i++)
+		{
+			width = WidthOfNode(root,i);
+			if(width>max) 
+				max=width;
+		}
+		return max;
+	}
+
+	void pathSum(node * n, vector<t> & sums, t sum)
+	{
+		if (isleaf(n))
+			sums.push_back(sum+n->data);
+		else
+		{
+			if (n->lchild!=NULL && n->rchild!=NULL)
+			{
+				pathSum(n->lchild,sums,sum+n->data);
+				pathSum(n->rchild,sums,sum+n->data);
+			}
+			else if (n->lchild!=NULL)
+				pathSum(n->lchild,sums,sum+n->data);
+			else if (n->rchild!=NULL)
+				pathSum(n->rchild,sums,sum+n->data);
+		}
+	}
+	void printPathSums()
+	{
+		vector<t> sum;
+		pathSum(root,sum,0);
+		for (int i=0; i<sum.size();i++)
+			cout<<sum[i]<<" ";
+	}
+
+	void updateKey(int key1, int key2)
+	{
+		if(search(key1)==1)
+		{
+			remove(ley1);
+			insert(key2);
+		}
+		else
+			"Not Found"<<endl;
+	}
+
+};

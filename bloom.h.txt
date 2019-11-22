@@ -1,0 +1,197 @@
+#include<iostream>
+#include<fstream>
+#include<time.h>
+#include<string>
+using namespace std;
+
+
+class bitvector
+{
+private:
+	unsigned char* bytes;
+	int n;
+public:
+	bitvector()
+	{
+		bytes=NULL;
+		n=0;
+	}
+	void bitvectorset(int bno)
+	{
+		n=bno;
+		int size=ceil(n/8);
+		bytes=new unsigned char[size];
+		for(int i=0;i<size;i++)
+		{
+			bytes[i]=0;
+		}
+	}
+	void set(int k)
+	{
+		int byte=k/8;
+		int bno=k%8;
+		unsigned char mask=0x80;
+		mask=mask>>bno;
+		bytes[byte]=bytes[byte]|mask;
+	}
+	void clear(int k)
+	{
+		int byte=k/8;
+		int bno=k%8;
+		unsigned char mask=0x80;
+		mask=mask>>bno;
+		bytes[bno]=bytes[bno]&(!mask);
+	}
+	bool get(int k)
+	{
+		int byte=k/8;
+		int bno=k%8;
+		unsigned char mask=0x80;
+		mask=mask>>bno;
+		return (mask & bytes[byte]);
+	}
+};
+
+class bloomfilter
+{
+private:
+	bitvector b;
+	long long p; 
+	long long m;
+	long long a1,a2,a3,a4,a5,a6;
+
+	unsigned int generate()
+	{
+		for(int j=0;j<500000000;j++)
+		{
+			j=j+5;
+		}
+		srand(time(NULL));
+		unsigned int sum=0, val=0;
+		string s;
+		for(int i=0;i<23;i++)
+		{
+			int b=rand()%2;
+			if(b==0)
+				s=s+'0';
+			else
+				s=s+'1';
+		}
+
+		int exp=23;
+		for(int i=0;i<23;i++,exp--)
+		{
+			val=pow(2,exp);
+			if(s[i]=='1')
+				sum=sum+val;
+		}
+		return sum;
+	}
+	unsigned int power(int exp, unsigned int n)
+	{
+		unsigned int s=1;
+		for(int i=0;i<exp;i++)
+		{
+			s=(s%p * n%p)%p;
+		}
+		return s;
+	}
+	unsigned int add(unsigned int a,unsigned int b)
+	{
+		unsigned int c;
+		a=a%p;
+		b=b%p;
+		c=a+b;
+		c=c%p;
+		return c;
+	}
+	unsigned int product(unsigned int a,unsigned int b)
+	{
+		unsigned int c;
+		a=a%p;
+		b=b%p;
+		c=a*b;
+		c=c%p;
+		return c;
+	}
+	unsigned int convert(string s,unsigned int a)
+	{
+		int k=s.length()-1;
+		unsigned int sum=0,y,z;
+		for(int i=0;i<s.length();i++)
+		{			
+			//sum = ( sum%p + ((s[i]%p) *(power(k,a)%p))%p )%p; // s5a4+s4a3+s3a2+s2a1+s2a0+s1a0			(s5%p * a4%p)%p
+			unsigned prod= product(s[i],power(k,a));
+			sum= add(sum,prod); //p(a,x)
+			sum=sum%p;
+			k--;
+		}
+		sum=sum%p;
+		sum=sum%m;
+		return sum;
+	}
+
+
+public:
+	bloomfilter()
+	{
+		p=16777213;
+		m=728000;
+		b.bitvectorset(m);
+		a1=generate()%p;
+		cout<<a1<<"     ";
+		a2=generate()%p;
+		cout<<a2<<"     ";
+		a3=generate()%p;
+		cout<<a3<<"     ";
+		a4=generate()%p;
+		cout<<a4<<"     ";
+		a5=generate()%p;
+		cout<<a5<<"     ";
+		a6=generate()%p;
+		cout<<a6<<"     ";		
+	}
+
+	void setCases(string s)
+	{
+		unsigned int b1,b2,b3,b4,b5,b6;
+		b1=convert(s,a1)%p;
+		b2=convert(s,a2)%p;
+		b3=convert(s,a3)%p;
+		b4=convert(s,a4)%p;
+		b5=convert(s,a5)%p;
+		b6=convert(s,a6)%p;
+		cout<<endl<<b.get(b1)<<endl;
+		b.set(b1);
+		cout<<endl<<b1<<endl;
+		cout<<endl<<b.get(b1)<<endl;
+
+		b.set(b2);
+		cout<<endl<<b2<<endl;
+		b.set(b3);
+		cout<<endl<<b3<<endl;
+		b.set(b4);
+		cout<<endl<<b4<<endl;
+		b.set(b5);
+		cout<<endl<<b5<<endl;
+		b.set(b6);
+		cout<<endl<<b6<<endl;
+	}
+
+	void store(string inputfile)
+	{
+		string s;
+		fstream fin(inputfile);
+		int i=0;
+		while(fin.eof()==0)
+		{
+			fin>>s;
+			setCases(s);
+			cout<<endl<<endl<<i<<endl<<endl;
+			i++;
+			getch();
+		}
+	}
+
+
+};

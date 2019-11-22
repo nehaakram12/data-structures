@@ -1,0 +1,20 @@
+#include <iostream>
+#include<conio.h>
+#include"Vector.cpp"
+using namespace std;
+
+void main()
+{
+	vector<int> v;
+	for(int i=0;i<10;i++)
+	{   v.push_back(i);	}
+	vector<int>::iterator itr;
+	for(itr=v.begin();*itr!=6;itr++);
+	v.insert(itr,-1);
+	for(itr=v.begin();*itr!=9;itr++);
+	v.erase(itr);
+	for(int i=0;i<v.getSize();i++)
+	{   cout<<v[i]<<" ";	}
+	cout<<endl;
+	getch();
+}

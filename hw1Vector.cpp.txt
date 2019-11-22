@@ -1,0 +1,94 @@
+#include "Vector.h"
+using namespace std;
+
+template <class T> vector<T>::vector()
+{
+	cap=256;
+	size=0;
+	arr=new T[256];
+}
+template <class T> vector<T>::vector(int c)
+{
+	cap=c;
+	size=0;
+	arr=new T[cap];
+}
+template <class T> void vector<T>::reallocate(int c)
+{
+	delete[]arr;
+	cap=c;
+	size=0;
+	arr=new T[cap];
+}
+template <class T> vector<T>::vector(const vector<T> & v)
+{
+	cap=v.cap;
+	size=v.size;
+	arr=new T[cap];
+	for(int i=0;i<size;i++)
+	{
+		arr[i]=v.arr[i];
+	}
+}
+template <class T> const vector<T> & vector<T>::operator =(const vector<T> & v)
+{
+	cap=v.cap;
+	size=v.size;
+	arr=new T[cap];
+	for(int i=0;i<size;i++)
+	{
+		arr[i]=v.arr[i];
+	}
+	return v;
+}
+template <class T> void vector<T>::push_back(const T obj)
+{
+	if(size<cap)
+	{
+		arr[size++]=obj;
+	}
+	else
+	{
+		int ncap=2*cap;
+		T* temp=new T[ncap];
+		for(int i=0;i<size;i++)
+		{
+			temp[i]=arr[i];
+		}
+		temp[cap]=obj;
+		delete[]arr;
+		arr=temp;
+		size++;
+		cap=ncap;
+	}
+	//cout<<obj<<"  "<<size<<"  "<<cap<<endl;
+}
+template <class T> void vector<T>::pop_back()
+{
+	if(size>0)
+		size--;
+	else
+		cout<<"Stack Empty"<<endl;
+	if(size<cap/2)
+	{
+		int ncap=cap/2;
+		T* temp=new T[ncap];
+		for(int i=0;i<size;i++)
+		{
+			temp[i]=arr[i];
+		}
+		delete[]arr;
+		arr=temp;
+		cap=ncap;
+	}
+}
+template <class T> int vector<T>::getSize()
+{
+	return size;
+}
+template <class T> T& vector<T>::operator [] (int n)
+{
+	return arr[n];
+}
+
+

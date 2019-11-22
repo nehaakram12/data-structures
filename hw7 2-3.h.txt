@@ -1,0 +1,750 @@
+#pragma once
+#include <iostream>
+using namespace std;
+
+class Tree23 //2-3 TREE
+{
+	struct node //one - two node
+	{//ELEMENTS
+		int* key;  //keys
+		node** child; //children pointer
+		int numC; //number of children
+		int numK; //number of keys
+		
+		node()//DEFAULT CONSTRUCTOR
+		{
+			key = nullptr; //no key
+			child = nullptr; //no children
+			numC = 0; //no.of children=0 
+			numK = 0; //no. of keys=0
+		}
+
+		node(int obj)//PARAMETERIZED CONSTRUCTOR
+		{
+			key = new int; //new key
+			*key = obj; //key is the parameter
+			numK = 1; //keys=1
+			child = nullptr; //no children
+			numC = 0; //no. of children=0
+		}
+
+		void insertLeaf(int obj)//INSERT A KEY IN NODE 
+		{
+			if (numK == 0) //if num of keys=0
+			{
+				key = new int; //newkey
+				*key = obj; //key is parameter
+				numK++; //keys=1
+			}
+			else //if keys
+			{
+				numK++; //inc keys
+				int *temp = key; //temp pointer
+				key = new int[numK]; //new key pointer
+				for (int i = 0; i < numK - 1; i++) //copy previous
+					key[i] = temp[i];//each element
+				key[numK - 1] = obj;//insert new key
+				sortArray(key, numK);//sort the order of keys
+			}
+		}
+
+		void sortArray(int* arr, int size)//SORTS THE KEYS IN ORDER
+		{
+			bool s = true; //flag
+			while (s)// till flag is true
+			{
+				s = false;//flag false
+				for (int j = 0; j < size - 1; j++) //check all elements
+					if (arr[j]>arr[j + 1])//if current > next
+					{
+						swap(arr[j], arr[j + 1]);//swap
+						s = true;//flag true 
+					}
+			}
+		}
+
+		void removeLeafKey(int obj)//REMOVE A KEY FROM NODE
+		{
+			if (numK != 0)//if key ptr is not empty
+			{
+				if (numK == 1) //if single key
+				{
+					delete key;//del key
+					key = nullptr;//null key
+					numK--;//keys 0
+				}
+				else//if many keys
+				{
+					numK--;//dec keys
+					int* temp = key;//temp key ptr
+					key = new int[numK];//new key ptr
+					for (int i = 0, j = 0; i < numK + 1; i++)//copy all values
+						if (temp[i] != obj)//dont copy obj
+						{
+							key[j] = temp[i];//copy else
+							j++;
+						}
+				}
+			}
+		}
+
+		bool Overflow() //RETURN TRUE IF OVERFLOW EXISTS
+		{
+			if (numK > 2)//if more than 2 keys
+				return true;//true
+			return false;//else false
+		}
+
+		bool Underflow() //RETURN TRUE IF UNDERFLOW EXISTS
+		{
+			if (numK < 1)//if less than one key
+				return true;//true
+			return false;//else false
+		}
+
+		bool isLeaf()//if leaf or Not
+		{
+			return ((numK == 1 || numK == 2) && numC == 0);//no children
+		}
+
+		bool isParent()//if Parent or not
+		{
+			return ((numK == 2 && numC == 3) || (numK == 1 && numC == 2));//one-two node + two-three children
+		}
+
+		bool oneNode()//if one node
+		{
+			return (numK == 1);//keys=1
+		}
+
+		bool twoNode()//if two node
+		{
+			return (numK == 2);//keys=2
+		}
+
+		void InsertChild(node*& c,int index)//INSERT A CHILD OF A NODE
+		{
+			if (numC > 0)//If children exist
+			{
+				node** temp = child;//temp points to children
+				numC++;//num of Children++
+				child = new node*[numC];//new children
+				for (int i = 0, j = 0; i < numC; i++)//till numC
+				{
+					if (i != index && j<numC-1)//if not index of new child
+					{
+						child[i] = temp[j];//copy temp
+						j++;//next temp child
+					}
+				}
+				child[index] = c;//new child stored at index
+			}
+			else//if no child
+			{
+				child = new node*;//new child
+				child[0] = c;//child stored at index
+				numC++;//num of Children++
+			}
+		}
+
+		void RemoveChild(node*& c,int index)//REMOVE A CHILD FROM NODE
+		{
+			if (numC > 0)//If children exist
+			{
+				node** temp = child;//temp points to children
+				numC--;//num of children--
+				if (numC > 0)//if still chidren exist
+				{
+					child = new node*[numC];//new children
+					for (int i = 0, j = 0; i < numC + 1; i++)//till numC+1
+					{
+						if (i != index && j<numC)//if not index of removed child
+						{
+							child[j] = temp[i];//copy temp child
+							j++;//next temp child
+						}
+					}
+				}
+				else//if only child
+					child = nullptr;//remove
+			}
+		}
+	};
+
+public:
+
+	node* root; //ROOT OF 2-3 TREE
+	int size; //SIZE OF 2-3 TREE
+	
+	//HELPERS:
+
+	bool OverflowRotate(node*& n, int i) //ROTATE IN CASE OF OVERFLOW
+	{
+		node *c1 = n->child[i];//Parent's child in overflow
+		if (i - 1 >= 0 && n->child[i - 1]->oneNode())//if left child exists and is one node
+		{
+			node* c2 = n->child[i - 1];//parent's left child
+			c2->insertLeaf(n->key[n->numK - 1]);//move from parent to c2
+			n->removeLeafKey(n->key[n->numK - 1]);//remove from parent
+			n->insertLeaf(c1->key[0]);//move from c1 to parent
+			c1->removeLeafKey(c1->key[0]);//remove from c1
+			//ADOPTION
+			if (c1->numC>0)//if c1 has children
+			{
+				c2->InsertChild(c1->child[0], c2->numC);//c2 adopts c1's child
+				c1->RemoveChild(c1->child[0], 0);//c1 removes child
+			}
+			return true;//rotate successful
+		}
+		else if (i + 1 < n->numC && n->child[i + 1]->oneNode())//if right child exits and is one node
+		{
+			node* c2 = n->child[i + 1];//parent's right child
+			c2->insertLeaf(n->key[i]);//move from parent to c2
+			n->removeLeafKey(n->key[i]);//remove from parent
+			n->insertLeaf(c1->key[c1->numK - 1]);//move from c1 to parent
+			c1->removeLeafKey(c1->key[c1->numK - 1]);//remove from c1
+			//ADOPTION
+			if (c1->numC>0)//if c1 has children
+			{
+				c2->InsertChild(c1->child[c1->numC - 1], 0);//c2 adopts child
+				c1->RemoveChild(c1->child[c1->numC - 1], c1->numC - 1);//c1 removes child
+			}
+			return true;//rotation successful
+		}
+		else//if rotation is unsuccessful
+			return false;//no rotation
+	}
+
+	bool UnderflowRotate(node*& n, int i)//ROTATE IN CASE OF UNDERFLOW
+	{
+		node *c1 = n->child[i];//Parent's child in underflow
+		if (i - 1 >= 0 && n->child[i - 1]->twoNode())//if left child exists and is two node
+		{
+			node* c2 = n->child[i - 1];//parent's right child
+			c1->insertLeaf(n->key[i - 1]);//move from parent to c1
+			n->removeLeafKey(n->key[i - 1]);//remove from parent
+			n->insertLeaf(c2->key[c2->numK - 1]);//move from c2 to parent
+			c2->removeLeafKey(c2->key[c2->numK - 1]);//remove from c2
+			//ADOPTION:
+			if (c2->numC>0)//if c2 has children
+			{
+				c1->InsertChild(c2->child[c2->numC - 1], 0);//c1 adopts child
+				c2->RemoveChild(c1->child[c2->numC - 1], c2->numC - 1);//c2 removes child
+			}
+			return true;//rotation successful
+		}
+		else if (i + 1 < n->numC && n->child[i + 1]->twoNode())//if right child exists and is two node
+		{
+			node* c2 = n->child[i + 1];//parent's right child
+			c1->insertLeaf(n->key[i]);//move from parent to c1
+			n->removeLeafKey(n->key[i]);//remove from parent
+			n->insertLeaf(c2->key[0]);//move from c2 to parent
+			c2->removeLeafKey(c2->key[0]);//remove from c2
+			//ADOPTION:
+			if (c2->numC>0)//if c2 has children
+			{
+				c1->InsertChild(c2->child[0], c1->numC);//c1 adopts child
+				c2->RemoveChild(c2->child[0], 0);//c2 removes child
+			}
+			return true;//rotation successful
+		}
+		else//if rotation unsuccessful
+			return false;//no rotation
+	}
+
+	void Split(node*&n, int i)//SPLIT A NODE IN TWO
+	{
+		if (!n->Overflow())//If overflow in child
+		{
+			node* c1 = n->child[i];//parent's child in overflow
+			n->insertLeaf(c1->key[1]);//move mid key from c1 to parent
+			c1->removeLeafKey(c1->key[1]);//remove mid-key from c1
+			n->RemoveChild(n->child[i], i);//remove c1 from parent
+			node* m1 = new node(c1->key[0]);//left key of c1
+			node* m2 = new node(c1->key[1]);//right key of c1
+			n->InsertChild(m1, i);//parent adopts left key
+			n->InsertChild(m2, i + 1);//parent adopts right key
+			if (c1->numC > 0)//if c1 has children
+			{
+				node** temp = c1->child;//temp points to c1's children
+				for (int j = 0, k = 0; j < c1->numC / 2; j++, k++)//half of c1's children
+					n->child[i]->InsertChild(temp[j], k);//n's left child adopts it
+				for (int j = c1->numC / 2, k = 0; j < c1->numC; j++, k++)//other half of c1's children
+					n->child[i + 1]->InsertChild(temp[j], k);//n's right child adopts it
+			}
+		}
+		else//If overflow in parent
+		{
+			node* c1 = n;//c1 is parent
+			n = new node(c1->key[1]);//parent is a new node of mid-key
+			c1->removeLeafKey(c1->key[1]);//remove mid-key from parent
+			node* m1 = new node(c1->key[0]);//left-key of c1
+			node* m2 = new node(c1->key[1]);//right-key of c1
+			n->InsertChild(m1, 0);//parent adopts left-key
+			n->InsertChild(m2, 1);//parent adopts right-key
+			if (n->numC > 0)//if c1 has children
+			{
+				node** temp = c1->child;//temp points to c1's children
+				for (int j = 0, k = 0; j < c1->numC / 2; j++, k++)//half of c1's children
+					n->child[0]->InsertChild(temp[j], k);//n's left child adopts it
+				for (int j = c1->numC / 2, k = 0; j < c1->numC; j++, k++)//other half of c1's children
+					n->child[1]->InsertChild(temp[j], k);//n's right child adopts it
+			}
+		}
+	}
+
+	void Merge(node*&n, int i)//MERGES TWO NODES TOGETHER
+	{
+		if (!n->Underflow())//If parent is not in underflow
+		{
+			node* c1 = n->child[i];//c1 is parent's child in underflow
+			if (i - 1 >= 0 && n->child[i - 1]->oneNode())//if left child exists and is one Node
+			{
+				node* c2 = n->child[i - 1];//c2 is left child
+				c2->insertLeaf(n->key[i - 1]);//move left-key from parent to c2
+				n->removeLeafKey(n->key[i - 1]);//remove left key from parent
+				if (c1->numC > 0)//if c1 has children
+					for (int j = 0; j < c1->numC; j++)//till numC
+						c2->InsertChild(c1->child[j], c2->numC);//c2 adopts them
+				n->RemoveChild(c1, i);//parent removes underflow child
+			}
+			else if (i + 1 < n->numC && n->child[i + 1]->oneNode())//if right child exists and is one node
+			{
+				node* c2 = n->child[i + 1];//c2 is right child
+				c2->insertLeaf(n->key[i]);//move mid-key from parent to c2
+				n->removeLeafKey(n->key[i]);//remove midkey from parent
+				if (c1->numC > 0)//if c1 has children
+					for (int j = 0; j < c1->numC; j++)//till numC
+						c2->InsertChild(c1->child[j], 0);//c2 adopts them
+				n->RemoveChild(c1, i);//parent removes underflow child
+			}
+		}
+		else//If parent is in underflow
+		{
+			if (n->numC > 0)//if parent has children
+				n = n->child[0];//point to child
+			else//no children
+				n = nullptr;//Nullify
+		}
+	}
+
+	void Predecessor(node*&n, int& newKey)//Finds Predecessor
+	{
+		node* curr = nullptr;//current ptr
+		if (n->oneNode())//if one node
+			curr = n->child[0];//left child
+		else//two node
+			if (n->key[0] == newKey)//if left key
+				curr = n->child[0];//left child
+			else//if right key
+				curr = n->child[1];//mid-child
+		while (!curr->isLeaf())//till a leaf
+		{
+			if (curr->oneNode())//one node
+				curr = curr->child[1];//right child
+			else//two node
+				curr = curr->child[2];//right child
+		}
+		if (curr->oneNode())//one node
+			newKey = curr->key[0];//left key
+		else if (curr->twoNode())//two node
+			newKey = curr->key[1];//mid key
+	}
+
+	// FUNCTIONS :
+
+	Tree23() //DEFAULT CONSTRUCTOR
+	{
+		root = nullptr;//no root
+		size = 0;//no size
+	}
+
+	bool insert(int newKey)//INSERT A KEY
+	{
+		int index = 0;//index
+		node *prev = nullptr, *curr = root;//previous and current
+		while (curr != nullptr)//till not null
+		{
+			index = 0;//index
+			for (int i = 0; i < curr->numK; i++)//till numK
+			{
+				if (newKey == curr->key[i])//key match
+					return false;//match = false
+				else if (newKey < curr->key[i])//if less
+				{
+					index = i;//index update
+					break;//end
+				}
+				else//if more
+					index++;//++
+			}
+			prev = curr;//prev update
+			if (curr->numC>0)//if has children
+				curr = curr->child[index];//moves to child
+			else//no child
+				curr = nullptr;//nullify
+ 		}
+		if (prev == nullptr) //no root
+		{
+			root = new node(newKey);//new root
+			size++;//size=1
+		}
+		else
+		{
+			prev->insertLeaf(newKey);//insert key
+			size++;//size update
+			int i = 0;//index 
+			if (Insert(newKey, root,i))//recursive insert call
+			{
+				Split(root,0);//if true = overflow and no rotate, split root
+			}
+		}
+		return true;//insert successful
+	}
+
+	bool Insert(int newkey, node*& n, int &i)//Insert recursive
+	{
+		if (n != nullptr)//not null
+		{
+			if (n->oneNode())//one node
+			{
+				if (newkey == n->key[0])//key match
+				{
+					i = 0;//index
+					return n->Overflow();//overflow check
+				}
+				else if (newkey < n->key[0])//less than key
+				{
+					i = 0;//index
+					bool rotate = Insert(newkey, n->child[i], i);//left child
+					if (rotate)//rotation
+						if (OverflowRotate(n, 0))//rotate check
+							return false;//done
+						else//no rotate
+						{
+							Split(n, 0);//split
+							return n->Overflow();//overflow check
+						}
+				}
+				else//more than key
+				{
+					i = 1;//index
+					bool rotate = Insert(newkey, n->child[i], i);//right child
+					if (rotate)//rotation
+						if (OverflowRotate(n, 1))//rotate check
+							return false;//done
+						else//no rotate
+						{
+							Split(n, 1);//split
+							return n->Overflow();//overflow check
+						}
+				}
+			}
+			else if (n->twoNode())//two node
+			{
+				if (newkey == n->key[0])//left key match
+				{
+					i = 0;//index
+					return n->Overflow();//overflow check
+				}
+				else if (newkey < n->key[0])//less than left key
+				{
+					i = 0;//index
+					bool rotate = Insert(newkey, n->child[i], i);//left child
+					if (rotate)//rotation
+						if (OverflowRotate(n, 0))//rotate check
+							return false;//done
+						else//no rotate
+						{
+							Split(n, 0);//split
+							return n->Overflow();//overflow check
+						}
+				}
+				else if (newkey == n->key[1])//right key check
+				{
+					i = 1;//index
+					return n->Overflow();//overflow check
+				}
+				else if (newkey < n->key[1])//less than right key
+				{
+					i = 1;//index
+					bool rotate = Insert(newkey, n->child[i], i);//mid child
+					if (rotate)//rotation
+						if (OverflowRotate(n, 1))//rotate check
+							return false;//done
+						else//no rotate
+						{
+							Split(n, 1);//split
+							return n->Overflow();//overflow check
+						}
+				}
+				else//more than right key
+				{
+					i = 2;//index
+					bool rotate = Insert(newkey, n->child[i], i);//right child
+					if (rotate)//rotation
+					{
+						if (OverflowRotate(n, 2))//rotate check
+							return false;//done
+						else//no rotate
+						{
+							Split(n, 2);//split
+							return n->Overflow();//overflow check
+						}
+					}
+				}
+			}
+			else//if three-key node
+			{
+				if (newkey == n->key[0])//left key check
+				{
+					i = 0;//index
+					return n->Overflow();//overflow check
+				}
+				else if (newkey == n->key[1])//mid key check
+				{
+					i = 1;//index
+					return n->Overflow();//overflow check
+				}
+				else if (newkey == n->key[2])//right key check
+				{
+					i = 2;//index
+					return n->Overflow();//overflow check
+				}
+			}
+		}
+	}
+
+	bool remove(int newKey)
+	{
+		int save = newKey;//key
+		bool p = false; //predecessor
+		int i = 0;//index
+		if (remove(root, newKey, i,p))//recursive remove call
+		{
+			Merge(root, i);//if underflow and no rotate , merge root
+		}
+		else if (i == -1)//if key not found
+			return false;//no match = false
+		size--;//size update
+		if (p == true)//if predecessor
+		{
+			node* curr = root;//current ptr
+			while (curr != nullptr)//till null
+			{
+				if (curr->oneNode())//one node
+					if (curr->key[0] == save)//if key
+					{
+						swap(curr->key[0], newKey);//swap
+						break;//end
+					}
+					else if (save < curr->key[0])//less than key
+						curr = curr->child[0];//left child
+					else//more than key
+						curr = curr->child[1];//right child
+				else if(curr->twoNode())//two node
+					if (curr->key[0] == save)//if left key
+					{
+						swap(curr->key[0], newKey);//swap 
+						break;//end
+					}
+					else if (save < curr->key[0])//less than left key
+						curr = curr->child[0];//left child
+					else if (curr->key[1] == save)//if right key
+					{
+						swap(curr->key[1], newKey);//swap
+						break;//end
+					}
+					else if (save < curr->key[1])//less than right key
+						curr = curr->child[1];//mid child
+					else //more than right key
+						curr = curr->child[2];//right child
+			}
+		}
+		return true;//removal successful
+	}
+
+	bool remove(node*&n, int& newkey, int &i, bool &p)//Recursive remove
+	{
+		if (n == nullptr)//if null
+		{
+			i = -1;//no key index
+			return false;//no key
+		}
+		else//not null
+			if (n->oneNode())//one node
+				if (n->key[0] == newkey)//key matches
+				{
+					i = 0;//index
+					if (n->isParent())//has children
+					{
+						Predecessor(n, newkey);//find replacement
+						p = true;//predecessor=true
+						return remove(n, newkey, i,p);//remove
+					}
+					else//leaf
+					{
+						n->removeLeafKey(newkey);//remove key
+						return n->Underflow();//underflow check
+					}
+				}
+				else if (n->key[0] > newkey)//less than key
+				{
+					i = 0;//index
+					bool rotate = remove(n->child[0], newkey, i,p);//left child
+					if (rotate)//rotation 
+						if (UnderflowRotate(n, 0))//rotate check
+							return false;//done
+						else//no rotate
+						{
+							Merge(n, 0);//merge
+							return n->Underflow();//underflow check
+						}
+				}
+				else//more than key
+				{
+					i = 1;//index
+					bool rotate = remove(n->child[1], newkey, i,p);//right child
+					if (rotate)//rotation
+						if (UnderflowRotate(n, 1))//rotate check
+							return false;//done
+						else//no rotate
+						{
+							Merge(n, 1);//merge 
+							return n->Underflow();//underflow check
+						}
+				}
+			else if (n->twoNode())//two node
+				if (n->key[0] == newkey)//left key match
+				{
+					i = 0;//index
+					if (n->isParent())//has children
+					{
+						Predecessor(n, newkey);//find replacement
+						p = true;//predecessor check
+						return remove(n, newkey, i,p);//remove
+					}
+					else//leaf
+					{
+						n->removeLeafKey(newkey);//remove key
+						return n->Underflow();//underflow check
+					}
+				}
+				else if (n->key[0] > newkey)//less than left key
+				{
+					i = 0;//index
+					bool rotate = remove(n->child[0], newkey, i,p);//left child
+					if (rotate)//rotation
+						if (UnderflowRotate(n, 0))//rotate check
+							return false;//done
+						else//no rotate
+						{
+							Merge(n, 0);//merge
+							return n->Underflow();//underflow check
+						}
+				}
+				else if (n->key[1] == newkey)//right key match
+				{
+					i = 1;//index
+					if (n->isParent())//has children
+					{
+						Predecessor(n, newkey);//find replacement
+						p = true;//predecessor check
+						return remove(n, newkey, i,p);//remove
+					}
+					else//leaf
+					{
+						n->removeLeafKey(newkey);//remove key
+						return n->Underflow();//underflow check
+					}
+				}
+				else if (n->key[1] > newkey)//less than right key
+				{
+					i = 1;//index
+					bool rotate = remove(n->child[1], newkey, i,p);//mid child
+					if (rotate)//rotation
+						if (UnderflowRotate(n, 1))//rotate check
+							return false;//done
+						else//no rotate
+						{
+							Merge(n, 1);//merge
+							return n->Underflow();//underflow check
+						}
+				}
+				else//more than right key
+				{
+					i = 2;//index
+					bool rotate = remove(n->child[2], newkey, i,p);//right child
+					if (rotate)//rotate
+						if (UnderflowRotate(n, 2))//rotate check
+							return false;//done
+						else//
+						{
+							Merge(n, 2);//merge
+							return n->Underflow();//underflow check
+						}
+				}
+	}
+
+	bool Search(int newKey)//SEARCH FUNCTION
+	{
+		return Search(newKey, root);//SEARCH FROM ROOT
+	}
+	
+	bool Search(int newKey,node* n)//Search from node
+	{
+		if (n == nullptr)//if null
+			return false;//no key
+		else//if not null
+			if (n->oneNode())//if numK==1
+				if (newKey == n->key[0])//1st key
+					return true;//found
+				else if (newKey < n->key[0])//smaller
+					return Search(newKey, n->child[0]);//left child
+				else//larger
+					return Search(newKey, n->child[1]);//right child
+			else if (n->twoNode())//if numK==2
+				if (newKey == n->key[0])//1st key
+					return true;//found
+				else if (newKey < n->key[0])//smaller
+					return Search(newKey, n->child[0]);//left child
+				else if (newKey == n->key[1])//2nd key
+					return true;//found
+				else if (newKey < n->key[1])//in between
+					return Search(newKey, n->child[1]);//mid child
+				else//larger
+					return Search(newKey, n->child[2]);//right child
+	}
+
+	void PrintAscending()//PRINT FUNCTION
+	{
+		PrintAscending(root);//PRINT FROM ROOT
+	}
+
+	void PrintAscending(node* n)//Print from node
+	{
+		if (n != nullptr)//if not null
+			if (n->isLeaf())//if leaf
+			{
+				cout << n->key[0] << " ";//1st key
+				if (n->twoNode())//if numK==2
+					cout << n->key[1] << " ";//2nd key
+			}
+			else//if parent
+			{
+				PrintAscending(n->child[0]);//left child
+				cout << n->key[0] << " ";//1st key
+				PrintAscending(n->child[1]);//mid-child or last child
+				if (n->twoNode())//if numK==2
+				{
+					cout << n->key[1] << " ";//2nd key
+					PrintAscending(n->child[2]);//last child
+				}
+			}
+	}
+
+	void getSize()//GETSIZE
+	{
+		cout << "Size: " << size << endl;//OUTPUT SIZE
+	}
+};

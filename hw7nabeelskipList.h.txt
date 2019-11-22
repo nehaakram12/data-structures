@@ -1,0 +1,216 @@
+#pragma once
+#include <iostream>
+#include <conio.h>
+#include <vector>
+#include <time.h>
+using namespace std;
+
+class skipList
+{
+	struct node {
+		int key;
+		node *right, *down;
+	};
+	int size;
+	vector<node*> heads;
+
+public:
+	skipList()
+	{
+		node* head = new node;
+		head->key = NULL;
+		head->down = head->right = nullptr;
+		heads.push_back(head);
+		size = 0;
+	}
+
+	void addlevel()
+	{
+		node* head = new node;
+		head->key = NULL;
+		head->right = nullptr;
+		head->down = heads[heads.size() - 1];
+		heads.push_back(head);
+	}
+	void insert(int newkey)
+	{
+		node* bottomnode = nullptr;
+		if (!search(newkey))
+		{
+			size++;
+			int levels = 0;
+			while (true)
+			{
+				int x = rand() % 2;
+				if (x != 0)
+					levels++;
+				else
+					break;
+			}
+			for (int i = 0; i <= levels; i++)
+			{
+				if (i >= heads.size())
+					addlevel();
+				node* currnode = heads[i];
+				if (currnode->right == nullptr)
+				{
+					node* newnode = new node;
+					newnode->key = newkey;
+					newnode->right = nullptr;
+					currnode->right = newnode;
+					if (i == 0)
+					{
+						newnode->down = nullptr;
+					}
+					else
+						newnode->down = bottomnode;
+					bottomnode = newnode;
+				}
+				else if (currnode->right != nullptr)
+				{
+					while (true)
+					{
+						if (currnode->right == nullptr)
+							break;
+						if (currnode->right->key < newkey)
+							currnode = currnode->right;
+						else
+							break;
+					}
+					node* newnode = new node;
+					newnode->key = newkey;
+					newnode->right = currnode->right;
+					currnode->right = newnode;
+					if (i == 0)
+					{
+						newnode->down = nullptr;
+					}
+					else
+						newnode->down = bottomnode;
+					bottomnode = newnode;
+				}
+			}
+		}
+		else
+			cout << "Key already present\n";
+	}
+
+	bool isLevelEmpty(node* currnode)
+	{
+		if (currnode->right == nullptr)
+			return true;
+		else
+			return false;
+	}
+
+	void resize()
+	{
+		int level = heads.size() - 1;
+		for (int i = level; i >= 0; i--)
+		{
+			node* currnode = heads[i];
+			if (isLevelEmpty(currnode))
+				heads.pop_back();
+		}
+	}
+
+	void erase(int ekey)
+	{
+		if (search(ekey))
+		{
+			size--;
+			node* delprev = heads[heads.size() - 1];
+			node* del;
+			while (true)
+			{
+				if (delprev->right != nullptr)
+				{
+					if (delprev->right->key == ekey)
+					{
+						del = delprev->right;
+						delprev->right = del->right;
+						delete del;
+						resize();
+						if (delprev->down != nullptr)
+						{
+							delprev = delprev->down;
+						}
+						else
+							break;
+					}
+					else if (delprev->right->key < ekey)
+					{
+						delprev = delprev->right;
+					}
+					else if (delprev->right->key > ekey)
+					{
+						if (delprev->down != nullptr)
+							delprev = delprev->down;
+					}
+				}
+				else
+				{
+					if (delprev->down != nullptr)
+					{
+						delprev = delprev->down;
+					}
+				}
+			}
+		}
+		else
+			cout << "Key not found\n";
+	}
+	bool search(int skey)
+	{
+		int level = heads.size() - 1;
+		node* currnode = heads[heads.size() - 1];
+		if (size == 0)
+			return false;
+		while (true)
+		{
+			if (currnode->right->key == skey)
+				return true;
+			if (currnode->right->key < skey)
+				currnode = currnode->right;
+			checknull:
+			if (currnode->right == nullptr)
+			{
+				if (level != 0)
+				{
+					level--;
+					currnode = currnode->down;
+					goto checknull;
+				}
+			}
+			if (currnode->right == nullptr && currnode->down == nullptr)
+			{
+				return false;
+			}
+			if (currnode->right->key > skey)
+			{
+				if (level != 0)
+				{
+					level--;
+					currnode = currnode->down;
+					goto checknull;
+				}
+				else
+				{
+					return false;
+				}
+			}
+		}
+	}
+	void printAscending()
+	{
+		node* currnode = heads[0];
+		currnode = currnode->right;
+		for (int i = 0; i < size; i++)
+		{
+			cout << currnode->key << ' ';
+			currnode = currnode->right;
+		}
+		cout << endl;
+	}
+
+};

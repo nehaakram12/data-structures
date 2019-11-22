@@ -1,0 +1,11 @@
+#include "bloomFilter.h"
+
+
+void main()
+{
+	bloomFilter x;
+	x.printa();
+	x.load();
+	x.readfile("file.txt");
+	system("pause");
+}

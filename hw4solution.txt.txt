@@ -1,0 +1,161 @@
+#include <iostream>
+#include <cmath>
+#include <vector>
+#include <string>
+using namespace std;
+
+//Problem 1
+void listNumbers_ascending(int start, int end){
+	if(start<=end){
+		cout<<start<<" ";
+		listNumbers_ascending(start+1,end);
+	}
+}
+void listNumbers_descending(int start, int end){
+	if(start<=end){		
+		listNumbers_descending(start+1,end);
+		cout<<start<<" ";
+	}
+}
+//Problem 2
+string repeat(string s, int n){
+	if(n==0)
+		return "";
+	else{
+		return s+repeat(s,n-1);
+	}
+}
+//Problem 6
+double harmonicSum(int n){
+	if(n==1)
+		return 1.0;
+	else
+	    return 1.0/n+harmonicSum(n-1);
+}
+
+//Problem 9
+bool isVowel(char c){
+	return (c=='a' || c=='A' ||
+		    c=='e' || c=='E' ||
+			c=='i' || c=='I' ||
+			c=='o' || c=='O' ||
+			c=='u' || c=='U');
+}
+
+string disemvowel(string s){
+	if(s[0]=='\0')
+		return "";
+	else if(!isVowel(s[0]))
+		return s[0]+disemvowel(s.substr(1,s.length()-1));
+	else
+		return disemvowel(s.substr(1,s.length()-1));	
+}
+
+//Problem 10
+int sumOfDigits(int n){
+	if(n==0)
+		return 0;
+	else{
+		int dig=n%10;
+		return dig+sumOfDigits(n/10);	
+	}
+}
+
+//Problem 11
+//wrapper
+int reverseDigits(int n, int&power);
+int reverseDigits(int n){
+	int power=1;
+	return reverseDigits(n,power);
+}
+int reverseDigits(int n, int&power){
+	if(n==0)
+		return 0;
+	else{
+		int num=reverseDigits(n/10,power);		
+		num=num+(n%10)*power;
+		power*=10;
+		return num;
+	}
+}
+
+
+//Problem 12
+//wrapper
+bool subsetSum(vector<bool> & picked,int a[], int n, int goal, int index);
+//recursive
+bool subsetSum(int a[], int n, int goal){
+	vector<bool> picked;
+	picked.resize(n);
+	for(int i=0;i<n;i++)
+		picked[i]=false;
+	
+	for(int i=0;i<n;i++)//start recursion at various starting points
+		if(subsetSum(picked,a,n,goal,i)==true)
+			return true;
+	
+	return false;
+
+}
+bool subsetSum(vector<bool> & picked,int a[], int n, int goal, int index){
+
+	picked[index]=true;
+	
+	if(goal-a[index]==0){
+		return true;
+	}else if(goal-a[index]<0){
+		picked[index]=false;
+		return false;
+	}else{
+		for(int i=0;i<n;i++){//make recursive calls
+			if(picked[i]==false){				
+				if(subsetSum(picked,a,n,goal-a[index],i)==true)					
+					return true;
+			}
+		}
+	}	
+	picked[index]=false;
+	return false;
+}
+
+//Problem 13
+bool binarySearch(int a[], int start, int end, int x){
+	if(start<=end){
+		int mid=(start+end)/2;
+
+		if(a[mid]==x)
+			return true;
+		else if(a[mid]<x)
+			return binarySearch(a,mid+1,end,x);
+		else
+			return binarySearch(a,start,mid-1,x);
+	}else{
+		return false;
+	}
+}
+
+//Problem 21
+int choose(int n, int k){
+	if(n==0)
+		return 0;
+	if(k==1)
+		return n;
+	
+	return choose(n-1,k-1)+choose(n-1,k);
+}
+
+
+//Problem 23
+int countPaths(int m, int n){
+	if(m==0 && n==0)
+		return 0;
+	else if(m==0 || n==0)
+		return 1;
+	else{
+		return countPaths(m-1,n)+countPaths(m,n-1);
+	}
+}
+
+void main(){
+	//try any function here
+}

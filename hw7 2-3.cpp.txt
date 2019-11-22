@@ -1,0 +1,59 @@
+#include <iostream>
+#include "Header.h"
+using namespace std;
+
+void Menu()
+{
+	cout << "0. EXIT" << endl;
+	cout << "1. INSERT" << endl;
+	cout << "2. REMOVE" << endl;
+	cout << "3. PRINT" << endl;
+	cout << "4. SIZE" << endl;
+}
+
+void main()
+{
+	Tree23 t;
+	for (int i = 0; i < 5000; i++)
+		t.insert(i);
+	Menu();
+	int choice;
+	cin >> choice;
+	while (choice != 0)
+	{
+		if (choice == 1)
+		{
+			cout << "ENTER : ";
+			int x;
+			cin >> x;
+			if (t.insert(x))
+				cout << "Successful" << endl;
+			else
+				cout << "Unsuccessful" << endl;
+		}
+		else if (choice == 2)
+		{
+			cout << "ENTER : ";
+			int x;
+			cin >> x;
+			if (t.remove(x))
+				cout << "Successful" << endl;
+			else
+				cout << "Unsuccessful" << endl;
+		}
+		else if (choice == 3)
+		{
+			cout << "Ascending Order : " << endl;
+			t.PrintAscending();
+			cout << endl;
+		}
+		else if (choice == 4)
+		{
+			t.getSize();
+		}
+		cout << endl;
+		Menu();
+		cin >> choice;
+	}
+	system("pause");
+}

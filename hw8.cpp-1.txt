@@ -1,0 +1,16 @@
+#include<iostream>
+#include<time.h>
+#include<string>
+#include<conio.h>
+#include "bloom.h"
+using namespace std;
+
+
+void main()
+{
+	bloomfilter b;
+	b.store("dict.txt");
+	b.readFile("text.txt");
+	getch();
+
+}
